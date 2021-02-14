@@ -1,4 +1,7 @@
-package client.networking;
+package networking;
+
+import logging.ClientLogger;
+import logging.LogType;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -10,7 +13,9 @@ public class Client {
     private DataOutputStream out;
     private DataInputStream in;
     private static Scanner scanner;
+    private ClientLogger clientLogger;
     private static String name;
+    private String serverName;
     private boolean success;
 
     public static final String ANSI_RESET = "\u001B[0m";
@@ -23,9 +28,10 @@ public class Client {
             Socket serverSocket = new Socket(ip, port);
             out = new DataOutputStream(serverSocket.getOutputStream());
             in = new DataInputStream(serverSocket.getInputStream());
+            clientLogger = new ClientLogger();
             success = true;
             this.name = name;
-            System.out.println(name);
+            clientLogger.printLog(String.format("Client with the name %s successfully initialized", name), success, LogType.Log);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -33,14 +39,18 @@ public class Client {
 
     public void handshake() {
         try {
-            out.writeInt(165313125);
+            out.writeInt(15315);
             out.flush();
             success = in.readInt() == 200;
             if (success){
                 out.writeUTF(name);
-                System.out.printf(ANSI_CYAN + "You successfully connected to %s%n"+ANSI_RESET, in.readUTF());
+                serverName = in.readUTF();
+                System.out.println(serverName);
+                clientLogger.printLog("You successfully connected to me", serverName, success, LogType.Log);
+            } else {
+                clientLogger.printLog("Connection failed try again", success, LogType.Log);
+                System.exit(1);
             }
-            System.out.println(success);
         } catch (IOException e) {
             e.printStackTrace();
         }

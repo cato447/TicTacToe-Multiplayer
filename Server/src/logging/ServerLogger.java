@@ -1,4 +1,4 @@
-package server.logging;
+package logging;
 
 import java.sql.Timestamp;
 

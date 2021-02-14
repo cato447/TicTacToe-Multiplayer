@@ -1,7 +1,7 @@
-package server.networking;
+package networking;
 
-import server.logging.LogType;
-import server.logging.ServerLogger;
+import logging.LogType;
+import logging.ServerLogger;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -28,7 +28,7 @@ public class Server {
             instreams = new HashMap<>();
             scanner = new Scanner(System.in);
             logger = new ServerLogger();
-            requiredConnections = 2;
+            requiredConnections = 1;
 
             logger.printLog("Server started successfully", LogType.Log);
         } catch (IOException e) {
@@ -96,6 +96,11 @@ public class Server {
                     ioException.printStackTrace();
                 }
             }
+        }
+        clients.clear();
+        System.out.println("Do you want to keep the server alive and wait for other clients ? [y]/[n]");
+        if (scanner.nextLine().equalsIgnoreCase("y")){
+            this.connectClients();
         }
     }
 

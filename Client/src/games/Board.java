@@ -1,4 +1,4 @@
-package client.games;
+package games;
 
 import javax.swing.*;
 import java.awt.*;

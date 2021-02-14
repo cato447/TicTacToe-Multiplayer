@@ -1,4 +1,4 @@
-package server.logging;
+package logging;
 
 public enum LogType {
     Log,
