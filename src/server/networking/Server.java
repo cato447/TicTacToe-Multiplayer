@@ -1,7 +1,7 @@
 package server.networking;
 
 import server.logging.LogType;
-import server.logging.Logger;
+import server.logging.ServerLogger;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -15,7 +15,7 @@ public class Server {
     private HashMap<Socket, String> clientNames;
     private HashMap<Socket, DataOutputStream> outstreams;
     private HashMap<Socket, DataInputStream> instreams;
-    private Logger logger;
+    private ServerLogger logger;
     private Scanner scanner;
     private int requiredConnections;
 
@@ -27,7 +27,7 @@ public class Server {
             outstreams = new HashMap<>();
             instreams = new HashMap<>();
             scanner = new Scanner(System.in);
-            logger = new Logger();
+            logger = new ServerLogger();
             requiredConnections = 2;
 
             logger.printLog("Server started successfully", LogType.Log);
