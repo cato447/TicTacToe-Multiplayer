@@ -44,4 +44,12 @@ public class ClientLogger {
     public void printLog(String message, boolean success, LogType logType){
         this.printLog(message, "server", success, logType);
     }
+
+    public void printConfirmation(int code){
+        if (code == 200){
+            printLog(" Status: sent!", true, LogType.Log);
+        } else {
+            printLog(" Status: not sent!", false, LogType.Log);
+        }
+    }
 }
