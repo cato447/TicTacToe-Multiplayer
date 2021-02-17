@@ -50,23 +50,6 @@ public class Client {
         }
     }
 
-    public void oneSidedMessage() {
-        while (true) {
-            System.out.print("input> ");
-            String message = scanner.nextLine();
-            try {
-                out.writeUTF(message);
-                clientLogger.printConfirmation(in.readInt());
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (Exception e){
-
-            }
-            if(message.equalsIgnoreCase("exit()"))
-                break;
-        }
-    }
-
     public void sendToServer(String message) {
         try {
             out.writeUTF(message);
@@ -77,21 +60,20 @@ public class Client {
         }
     }
 
+    public String getGameState(){
+        try {
+            out.writeUTF("gamestate");
+            return in.readUTF();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
     public boolean hasSucceeded() {
         return success;
     }
 
     public String getName(){return name;}
 
-
-    public static void main(String[] args) {
-        Client client;
-        if (args.length > 0) {
-            client = new Client("localhost", 2589, args[0]);
-        } else {
-            client = new Client("localhost", 2589, "GenericName");
-        }
-        client.handshake();
-        client.oneSidedMessage();
-    }
 }
