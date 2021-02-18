@@ -1,4 +1,4 @@
-package games.TicTacToe;
+package game;
 
 import javafx.application.Application;
 import javafx.event.EventHandler;
@@ -26,8 +26,6 @@ public class TicTacToe_Client extends Application {
         grid.setGridLinesVisible(true);
     }
 
-
-
     private void drawCross(int column, int row){
         Text cross = new Text("X");
         cross.setFont(Font.font("Tahoma", FontWeight.NORMAL, 200));
@@ -39,7 +37,6 @@ public class TicTacToe_Client extends Application {
         circle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 200));
         grid.add(circle, column, row);
     }
-
 
     private void drawEmptyField(int column, int row) {
         Text emptyField = new Text(" ");
@@ -53,8 +50,8 @@ public class TicTacToe_Client extends Application {
             return;
         }
         for (int i = 0; i < gameState.length(); i++){
-            int column = i % 3;
-            int row = i / 3;
+            int column = i / 3;
+            int row = i % 3;
             if (gameState.charAt(i) == 'x'){
                 this.drawCross(column, row);
             } else if (gameState.charAt(i) == 'o'){
@@ -73,8 +70,16 @@ public class TicTacToe_Client extends Application {
         scene.setOnMousePressed(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
-                client.sendToServer(String.format("(%f|%f)", event.getX(), event.getY()));
-                client.getGameState();
+                client.sendToServer("update");
+                client.sendToServer(String.format("%f|%f", event.getX(), event.getY()));
+                String gameState = client.getResponse();
+                if (gameState.length() == 9) {
+                    drawBoard(gameState);
+                } else {
+                    int column = (int) event.getX() / 300;
+                    int row = (int) event.getY() / 300;
+                    System.err.printf("You are not allowed to place at %f|%f%n", column, row);
+                }
             }
         });
         return scene;
@@ -82,6 +87,9 @@ public class TicTacToe_Client extends Application {
 
     @Override
     public void start(Stage primaryStage) {
+        client = new Client("localhost", 2589, "TestClient");
+        client.handshake();
+
         primaryStage.setTitle("TicTacToe");
         primaryStage.setResizable(false);
 
@@ -91,10 +99,7 @@ public class TicTacToe_Client extends Application {
 
         primaryStage.show();
 
-        this.drawBoard("---------");
-
-        client = new Client("localhost", 2589, "TestClient");
-        client.handshake();
+        this.drawBoard(client.getGameState());
     }
 
     public static void main(String[] args) {
