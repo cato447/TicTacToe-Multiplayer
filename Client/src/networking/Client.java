@@ -3,7 +3,6 @@ package networking;
 import logging.ClientLogger;
 import logging.LogType;
 
-import javax.swing.*;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -75,10 +74,27 @@ public class Client {
         return "";
     }
 
+    public boolean getBooleanResponse(String value){
+        try {
+            boolean booleanResponse = in.readBoolean();
+            clientLogger.printLog(String.format(value + ": %b", booleanResponse), serverName, booleanResponse, LogType.Log);
+            return booleanResponse;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public String getGameState() {
         this.sendToServer("gameState");
         String gameState = this.getResponse();
         return gameState;
+    }
+
+    public boolean getGameEnded() {
+        this.sendToServer("gameEnded");
+        boolean gameEnded = this.getBooleanResponse("Game ended");
+        return gameEnded;
     }
 
     public void exitProcess(){

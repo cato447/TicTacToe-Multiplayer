@@ -6,16 +6,22 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import networking.Client;
 
+import java.util.Arrays;
+import java.util.LinkedList;
+
 public class TicTacToe_Client extends Application {
 
     GridPane grid;
     Client client;
+    Scene scene;
 
     private void initializeGrid(){
         grid = new GridPane();
@@ -23,7 +29,6 @@ public class TicTacToe_Client extends Application {
         grid.setAlignment(Pos.CENTER);
         grid.setHgap(150);
         grid.setVgap(75);
-        grid.setGridLinesVisible(true);
     }
 
     private void drawCross(int column, int row){
@@ -39,8 +44,8 @@ public class TicTacToe_Client extends Application {
     }
 
     private void drawEmptyField(int column, int row) {
-        Text emptyField = new Text(" ");
-        emptyField.setFont(Font.font("Tahoma", FontWeight.NORMAL, 200));
+        Text emptyField = new Text("  ");
+        emptyField.setFont(Font.font("Tahoma", FontWeight.NORMAL, 220));
         grid.add(emptyField, column, row);
     }
 
@@ -64,25 +69,47 @@ public class TicTacToe_Client extends Application {
     }
 
     private Scene setScene(){
-        Scene scene = new Scene(grid, 900, 900);
+        scene = new Scene(grid, 900, 900);
         scene.getStylesheets().add
                 (TicTacToe_Client.class.getResource("TicTacToe_Client.css").toExternalForm());
         scene.setOnMousePressed(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
-                client.sendToServer("update");
-                client.sendToServer(String.format("%f|%f", event.getX(), event.getY()));
-                String gameState = client.getResponse();
-                if (gameState.length() == 9) {
-                    drawBoard(gameState);
-                } else {
-                    int column = (int) event.getX() / 300;
-                    int row = (int) event.getY() / 300;
-                    System.err.printf("You are not allowed to place at %f|%f%n", column, row);
-                }
+                onMouseClick(event);
             }
         });
         return scene;
+    }
+
+    private void onMouseClick(MouseEvent event){
+        client.sendToServer("update");
+        client.sendToServer(String.format("%f|%f", event.getX(), event.getY()));
+        String gameState = client.getResponse();
+        if (gameState.length() == 9) {
+            drawBoard(gameState);
+            if (!client.getGameEnded()){
+                gameState = client.getResponse();
+                drawBoard(gameState);
+            } else {
+                LinkedList<Integer> winCoordinates = new LinkedList<>();
+                String response = client.getResponse();
+                for (String s: Arrays.copyOfRange(response.split(";"),0, 4)) {
+                    winCoordinates.add(Integer.valueOf(s) * 300);
+                }
+                this.drawWinningLine(winCoordinates);
+                client.exitProcess();
+            }
+        } else {
+            int column = (int) event.getX() / 300;
+            int row = (int) event.getY() / 300;
+            System.err.printf("You are not allowed to place at %d|%d%n", column, row);
+        }
+    }
+
+    private void drawWinningLine(LinkedList<Integer>winCoordinates){
+        Line winningLine = new Line(winCoordinates.get(0), winCoordinates.get(1), winCoordinates.get(2), winCoordinates.get(3));
+        winningLine.setFill(Color.RED);
+        grid.add(winningLine, winCoordinates.get(0)/300, winCoordinates.get(1)/300, 3, 3);
     }
 
     @Override
