@@ -4,4 +4,4 @@ jar cmvf META-INF/MANIFEST.MF singleServer.jar *
 scp singleServer.jar root@server:/root
 rm singleServer.jar
 cd /home/cato447/Code/ArcadeMachine/deployment/singleplayer/
-./startSingleServer.sh
+./startSingleServer
