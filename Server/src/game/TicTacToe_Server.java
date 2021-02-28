@@ -34,16 +34,16 @@ public class TicTacToe_Server {
         board = this.convertToNumbers(gameState);
     }
 
-    public int makeClientMove(String input) {
+    public boolean makeClientMove(String input) {
         int column = Double.valueOf(input.split("\\|")[0]).intValue() / 300;
         int row = Double.valueOf(input.split("\\|")[1]).intValue() / 300;
         int index = column * 3 + row;
 
         if (isLegalMove(column, row)) {
             makeMoveOnBoard(index, 0);
-            return 200;
+            return true;
         } else {
-            return 404;
+            return false;
         }
     }
 

@@ -121,8 +121,8 @@ public class SinglePlayerServer {
                     outstreams.get(client).writeInt(200);
                     outstreams.get(client).flush();
                     serverLogger.printLog("Sent verification code", clientNames.get(client), LogType.Log);
-                    int verificationCode = ticTacToe_server.makeClientMove(position);
-                    if (verificationCode == 200) {
+                    boolean moveAllowed = ticTacToe_server.makeClientMove(position);
+                    if (moveAllowed) {
                         String gameState = ticTacToe_server.getGameState();
                         outstreams.get(client).writeUTF(gameState);
                         outstreams.get(client).flush();

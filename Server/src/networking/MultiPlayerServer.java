@@ -81,22 +81,22 @@ public class MultiPlayerServer {
     }
 
     public void ticTacToe_gameloop() {
-        for (Socket client : clients.values()) {
-            try {
-                while (!client.isClosed()) {
-                    String message = instreams.get(client).readUTF();
-                    serverLogger.printLog(message, clientNames.get(client), LogType.Message);
-                    outstreams.get(client).writeInt(200);
-                    outstreams.get(client).flush();
-                    serverLogger.printLog("Sent verification code", clientNames.get(client), LogType.Log);
-                    this.gameFlow(message, client);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+        while(clients.size() == 2) {
+            for (Socket client : clients.values()) {
                 try {
-                    client.close();
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
+                        String message = instreams.get(client).readUTF();
+                        serverLogger.printLog(message, clientNames.get(client), LogType.Message);
+                        outstreams.get(client).writeInt(200);
+                        outstreams.get(client).flush();
+                        serverLogger.printLog("Sent verification code", clientNames.get(client), LogType.Log);
+                        this.gameFlow(message, client);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    try {
+                        client.close();
+                    } catch (IOException ioException) {
+                        ioException.printStackTrace();
+                    }
                 }
             }
         }
@@ -121,8 +121,8 @@ public class MultiPlayerServer {
                     outstreams.get(client).writeInt(200);
                     outstreams.get(client).flush();
                     serverLogger.printLog("Sent verification code", clientNames.get(client), LogType.Log);
-                    int verificationCode = ticTacToe_server.makeClientMove(position);
-                    if (verificationCode == 200) {
+                    boolean isAllowed = ticTacToe_server.makeClientMove(position);
+                    if (isAllowed) {
                         String gameState = ticTacToe_server.getGameState();
                         outstreams.get(client).writeUTF(gameState);
                         outstreams.get(client).flush();

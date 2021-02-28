@@ -4,7 +4,7 @@
     <root id="root">
       <element id="archive" name="Client.jar">
         <element id="directory" name="META-INF">
-          <element id="file-copy" path="$PROJECT_DIR$/src/META-INF/MANIFEST.MF" />
+          <element id="file-copy" path="$PROJECT_DIR$/src/META-INF/MANIFEST.MF" output-file-name="singeleServerManifest.MF" />
         </element>
         <element id="module-output" name="Client" />
       </element>
