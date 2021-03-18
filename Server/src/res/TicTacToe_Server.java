@@ -1,4 +1,4 @@
-package game;
+package res;
 
 import java.awt.*;
 import java.nio.charset.StandardCharsets;
@@ -47,7 +47,7 @@ public class TicTacToe_Server {
         }
     }
 
-    public void makeServerMove(){
+    public void makeComputerMove(){
         LinkedList<Integer> emptySpaces = getEmptySpaces();
         if (emptySpaces.size() > 0) {
             Random random = new Random();

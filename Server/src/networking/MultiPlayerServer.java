@@ -1,6 +1,6 @@
 package networking;
 
-import game.TicTacToe_Server;
+import res.TicTacToe_Server;
 import logging.LogType;
 import logging.ServerLogger;
 
@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Scanner;
 
 public class MultiPlayerServer {
@@ -35,6 +37,7 @@ public class MultiPlayerServer {
             scanner = new Scanner(System.in);
             serverLogger = new ServerLogger();
             requiredConnections = 2;
+            serverLogger.printLog(ticTacToe_server.getGameState(), this.getClass().getName(), LogType.Log);
 
             serverLogger.printLog("Server started successfully", LogType.Log);
         } catch (IOException e) {
@@ -66,8 +69,6 @@ public class MultiPlayerServer {
                     outstreams.get(client).writeInt(200);
                     outstreams.get(client).flush();
                     clientNames.put(client, instreams.get(client).readUTF());
-                    outstreams.get(client).writeUTF(serverSocket.getInetAddress().getHostAddress() + ":" + serverSocket.getLocalPort());
-                    outstreams.get(client).flush();
                     serverLogger.printLog(String.format("%s got connected", clientNames.get(client)), LogType.Log);
                 } else {
                     outstreams.get(client).writeInt(403);
@@ -81,15 +82,15 @@ public class MultiPlayerServer {
     }
 
     public void ticTacToe_gameloop() {
-        while(clients.size() == 2) {
+        while (clients.size() == 2) {
             for (Socket client : clients.values()) {
                 try {
-                        String message = instreams.get(client).readUTF();
-                        serverLogger.printLog(message, clientNames.get(client), LogType.Message);
-                        outstreams.get(client).writeInt(200);
-                        outstreams.get(client).flush();
-                        serverLogger.printLog("Sent verification code", clientNames.get(client), LogType.Log);
-                        this.gameFlow(message, client);
+                    String message = instreams.get(client).readUTF();
+                    serverLogger.printLog(message, clientNames.get(client), LogType.Message);
+                    outstreams.get(client).writeInt(200);
+                    outstreams.get(client).flush();
+                    serverLogger.printLog("Sent verification code", clientNames.get(client), LogType.Log);
+                    this.gameFlow(message, client);
                 } catch (IOException e) {
                     e.printStackTrace();
                     try {
@@ -102,64 +103,110 @@ public class MultiPlayerServer {
         }
     }
 
-    public void gameFlow(String input, Socket client) {
-        switch (input) {
-            case "gameState":
-                try {
-                    outstreams.get(client).writeUTF(ticTacToe_server.getGameState());
-                    outstreams.get(client).flush();
-                    serverLogger.printLog("Sent gameState", clientNames.get(client), LogType.Log);
-                    break;
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+    public void sendGameState(){
+        try {
+            int index = 0;
+            for (DataOutputStream outstream: outstreams.values()) {
+                outstream.writeUTF(ticTacToe_server.getGameState());
+                outstream.flush();
+                serverLogger.printLog("Sent gameState", clientNames.get(index), LogType.Log);
+                index++;
+            }
 
-            case "update":
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void gameFlow(String input, Socket client){
+        switch (input){
+            case "ready":
+                gameFlow("gameState", client);
+                break;
+
+            case "gameState":
+                sendGameState();
+                break;
+
+            case "clientMove":
                 try {
+                    //Get position (X|Y)
                     String position = instreams.get(client).readUTF();
                     serverLogger.printLog(position, clientNames.get(client), LogType.Message);
+                    //Send confirmation (2ßß)
                     outstreams.get(client).writeInt(200);
                     outstreams.get(client).flush();
                     serverLogger.printLog("Sent verification code", clientNames.get(client), LogType.Log);
-                    boolean isAllowed = ticTacToe_server.makeClientMove(position);
-                    if (isAllowed) {
-                        String gameState = ticTacToe_server.getGameState();
-                        outstreams.get(client).writeUTF(gameState);
-                        outstreams.get(client).flush();
-                        serverLogger.printLog(String.format("Sent gameState: %s", gameState), clientNames.get(client), LogType.Log);
-                        break;
+                    boolean moveAllowed = ticTacToe_server.makeClientMove(position);
+                    if (moveAllowed) {
+                        sendGameState();
                     } else {
-                        outstreams.get(client).writeUTF(" ");
+                        //send " "
+                        outstreams.get(client).writeUTF("userInput");
                         outstreams.get(client).flush();
+                        serverLogger.printLog("Requested userInput", LogType.Log);
                         serverLogger.printLog(String.format("Move is not allowed!"), clientNames.get(client), LogType.Error);
-                        break;
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+                break;
+
+            case "computerMove":
+                ticTacToe_server.makeComputerMove();
+                sendGameState();
+                try {
+                    outstreams.get(client).writeUTF("userInput");
+                    outstreams.get(client).flush();
+                    serverLogger.printLog("Requested userInput", LogType.Log);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                break;
+
+            case "serverType":
+                try {
+                    outstreams.get(client).writeBoolean(true);
+                    outstreams.get(client).flush();
+                    serverLogger.printLog("Sent serverType", clientNames.get(client), LogType.Log);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                break;
+
+            case "isClientOne":
+                for (Map.Entry<Integer, Socket> entry : clients.entrySet()) {
+                    if (Objects.equals(client, entry.getValue())) {
+                        try {
+                            outstreams.get(client).writeBoolean(entry.getKey() == 0);
+                            outstreams.get(client).flush();
+                            serverLogger.printLog("Sent isPlayerOne", clientNames.get(client), LogType.Log);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        serverLogger.printLog("Current client not in clients!", LogType.Error);
+                    }
+                }
+                break;
 
             case "gameEnded":
                 try {
                     boolean gameEnded = ticTacToe_server.gameEnded();
                     outstreams.get(client).writeBoolean(gameEnded);
                     if (gameEnded) {
+                        //send coordinates
                         String coordinates = "";
-                        for (Point point : ticTacToe_server.getWinCoordinates()) {
+                        for (Point point: ticTacToe_server.getWinCoordinates()) {
                             coordinates += point.x + ";" + point.y + ";";
                         }
+                        //send winning fields
                         outstreams.get(client).writeUTF(coordinates);
-                        break;
-                    } else {
-                        ticTacToe_server.makeServerMove();
-                        String gameState = ticTacToe_server.getGameState();
-                        outstreams.get(client).writeUTF(gameState);
-                        outstreams.get(client).flush();
-                        serverLogger.printLog(String.format("Sent gameState: %s", gameState), clientNames.get(client), LogType.Log);
-                        break;
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+                break;
 
             case "exit()":
                 try {
@@ -168,11 +215,11 @@ public class MultiPlayerServer {
                     outstreams.get(client).close();
                     instreams.get(client).close();
                     client.close();
-                    serverLogger.printLog(String.format("%s closed the connection", clientNames.get(client)), LogType.Log);
-                    break;
+                    serverLogger.printLog(String.format("%s closed the connection",clientNames.get(client)), LogType.Log);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+                break;
         }
     }
 

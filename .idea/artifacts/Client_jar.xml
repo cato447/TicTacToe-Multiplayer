@@ -1,14 +1,17 @@
 <component name="ArtifactManager">
-  <artifact name="Client:jar">
+  <artifact type="jar" name="Client:jar">
     <output-path>$PROJECT_DIR$/out/artifacts/Client_jar</output-path>
-    <root id="root">
-      <element id="archive" name="Client.jar">
-        <element id="directory" name="META-INF">
-          <element id="file-copy" path="$PROJECT_DIR$/src/META-INF/MANIFEST.MF" output-file-name="singeleServerManifest.MF" />
-        </element>
-        <element id="module-output" name="Client" />
-      </element>
-      <element id="library" level="project" name="JavaFx" />
+    <root id="archive" name="Client.jar">
+      <element id="module-output" name="Client" />
+      <element id="extracted-dir" path="$PATH_TO_FX$/src.zip" path-in-jar="/" />
+      <element id="extracted-dir" path="$PATH_TO_FX$/javafx-swt.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PATH_TO_FX$/javafx.web.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PATH_TO_FX$/javafx.base.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PATH_TO_FX$/javafx.fxml.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PATH_TO_FX$/javafx.media.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PATH_TO_FX$/javafx.swing.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PATH_TO_FX$/javafx.controls.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PATH_TO_FX$/javafx.graphics.jar" path-in-jar="/" />
     </root>
   </artifact>
 </component>
