@@ -68,7 +68,7 @@ public class SinglePlayerServer {
                     outstreams.get(client).writeInt(200);
                     outstreams.get(client).flush();
                     clientNames.put(client, instreams.get(client).readUTF());
-                    serverLogger.printLog(String.format("%s got connected", clientNames.get(client)), LogType.Log);
+                    serverLogger.printLog(String.format("Client: \"%s\" got connected", clientNames.get(client)), LogType.Log);
                 } else {
                     outstreams.get(client).writeInt(403);
                     outstreams.get(client).flush();
@@ -89,7 +89,7 @@ public class SinglePlayerServer {
                     serverLogger.printLog(message, clientNames.get(client), LogType.Message);
                     outstreams.get(client).writeInt(200);
                     outstreams.get(client).flush();
-                    serverLogger.printLog("Sent verification code", clientNames.get(client), LogType.Log);
+                    serverLogger.printLog("Sent verification code", "200", clientNames.get(client), LogType.Log);
                     this.gameFlow(message, client);
                 }
             } catch (IOException e) {
@@ -105,9 +105,10 @@ public class SinglePlayerServer {
 
     public void sendGameState(Socket client){
         try {
-            outstreams.get(client).writeUTF(ticTacToe_server.getGameState());
+            String gameState = ticTacToe_server.getGameState();
+            outstreams.get(client).writeUTF(gameState);
             outstreams.get(client).flush();
-            serverLogger.printLog("Sent gameState", clientNames.get(client), LogType.Log);
+            serverLogger.printLog("Sent gameState", gameState, clientNames.get(client), LogType.Log);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -131,7 +132,7 @@ public class SinglePlayerServer {
                     //Send confirmation (2ßß)
                     outstreams.get(client).writeInt(200);
                     outstreams.get(client).flush();
-                    serverLogger.printLog("Sent verification code", clientNames.get(client), LogType.Log);
+                    serverLogger.printLog("Sent verification code", "200", clientNames.get(client), LogType.Log);
                     boolean moveAllowed = ticTacToe_server.makeClientMove(position);
                     if (moveAllowed) {
                         sendGameState(client);
@@ -163,7 +164,7 @@ public class SinglePlayerServer {
                 try {
                     outstreams.get(client).writeBoolean(true);
                     outstreams.get(client).flush();
-                    serverLogger.printLog("Sent serverType", clientNames.get(client), LogType.Log);
+                    serverLogger.printLog("Sent serverType", Boolean.toString(true), clientNames.get(client), LogType.Log);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -173,9 +174,10 @@ public class SinglePlayerServer {
                 for (Map.Entry<Integer, Socket> entry : clients.entrySet()) {
                     if (Objects.equals(client, entry.getValue())) {
                         try {
-                            outstreams.get(client).writeBoolean(entry.getKey() == 0);
+                            boolean isClientOne = entry.getKey() == 0;
+                            outstreams.get(client).writeBoolean(isClientOne);
                             outstreams.get(client).flush();
-                            serverLogger.printLog("Sent isPlayerOne", clientNames.get(client), LogType.Log);
+                            serverLogger.printLog("Sent isPlayerOne", Boolean.toString(isClientOne), clientNames.get(client), LogType.Log);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -197,13 +199,14 @@ public class SinglePlayerServer {
                         }
                         //send winning fields
                         outstreams.get(client).writeUTF(coordinates);
+                        serverLogger.printLog("Winning coordinates got sent", coordinates, clientNames.get(client), LogType.Log);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
                 break;
 
-            case "exit()":
+            case "exit":
                 try {
                     outstreams.get(client).writeInt(200);
                     outstreams.get(client).flush();
@@ -211,6 +214,17 @@ public class SinglePlayerServer {
                     instreams.get(client).close();
                     client.close();
                     serverLogger.printLog(String.format("%s closed the connection",clientNames.get(client)), LogType.Log);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                break;
+
+            case "reset":
+                try {
+                    outstreams.get(client).writeInt(200);
+                    outstreams.get(client).flush();
+                    ticTacToe_server.resetGameState();
+                    this.gameFlow("gameState", client);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

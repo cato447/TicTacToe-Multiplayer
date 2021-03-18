@@ -14,14 +14,14 @@ public class ServerLogger {
     private static final String ANSI_CYAN = "\u001B[36m";
     private static final String ANSI_WHITE = "\u001B[37m";
 
-    public void printLog(String message, String name, LogType logType){
+    public void printLog(String message, String value, String name, LogType logType){
         switch (logType){
             case Log:
-                System.out.printf(ANSI_CYAN + "%s %s%n"+ANSI_RESET, new Timestamp(System.currentTimeMillis()), message);
+                System.out.printf(ANSI_CYAN + "%s %s: %s%n"+ANSI_RESET, new Timestamp(System.currentTimeMillis()), message, value);
                 break;
 
             case Error:
-                System.out.printf(ANSI_RED + "%s %s%n"+ ANSI_RESET, new Timestamp(System.currentTimeMillis()), message);
+                System.out.printf(ANSI_RED + "%s %s: %s%n"+ ANSI_RESET, new Timestamp(System.currentTimeMillis()), message, value);
                 break;
 
             case Message:
@@ -33,7 +33,11 @@ public class ServerLogger {
         }
     }
 
+    public void printLog(String message, String name, LogType logType){
+        this.printLog(message, "", name, logType);
+    }
+
     public void printLog(String message, LogType logType){
-        this.printLog(message, "", logType);
+        this.printLog(message, "", "", logType);
     }
 }

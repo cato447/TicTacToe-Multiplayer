@@ -15,8 +15,8 @@ public class TicTacToe_Server {
         gameState = "---------";
     }
 
-    public void setGameState(String gameState) {
-        this.gameState = gameState;
+    public void resetGameState() {
+        this.gameState = "---------";
     }
 
     public String getGameState() {

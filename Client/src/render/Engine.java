@@ -108,7 +108,6 @@ public class Engine extends Application {
     private void onMouseClick(MouseEvent event) {
         mouseClicked = true;
         coordinates.setLocation(event.getX(), event.getY());
-        System.out.println(coordinates.getX() + ":" + coordinates.getY());
     }
 
     public boolean isMouseClicked() {

@@ -58,7 +58,7 @@ public class Client {
             out.writeUTF(message);
             out.flush();
             success = in.readInt() == 200;
-            clientLogger.printLog(String.format("Sent the message: %s", message), serverName, success, LogType.Log);
+            clientLogger.printLog(String.format("Sent the message: %s", message), serverName, success, LogType.Output);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -68,7 +68,7 @@ public class Client {
         try {
             out.writeInt(200);
             out.flush();
-            clientLogger.printLog("Sent verification code", serverName, true, LogType.Log);
+            clientLogger.printLog("Sent verification code", serverName, true, LogType.Output);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -77,7 +77,7 @@ public class Client {
     public String getResponse() {
         try {
             String message = in.readUTF();
-            clientLogger.printLog(String.format("Message recieved: %s", message), serverName, true, LogType.Log);
+            clientLogger.printLog(String.format("Message recieved: %s", message), serverName, true, LogType.Input);
             return message;
         } catch (IOException e) {
             e.printStackTrace();
@@ -88,7 +88,7 @@ public class Client {
     public boolean getBooleanResponse(String message) {
         try {
             boolean state = in.readBoolean();
-            clientLogger.printLog(String.format("%s: %b", message, state), serverName, true, LogType.Log);
+            clientLogger.printLog(String.format("%s: %b", message, state), serverName, true, LogType.Input);
             return state;
         } catch (IOException e) {
             e.printStackTrace();
@@ -119,7 +119,7 @@ public class Client {
         boolean gameEnded = false;
         try {
             gameEnded = in.readBoolean();
-            clientLogger.printLog(String.format("Game ended: %b", gameEnded), serverName, gameEnded, LogType.Log);
+            clientLogger.printLog(String.format("Game ended: %b", gameEnded), serverName, gameEnded, LogType.Input);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -132,10 +132,21 @@ public class Client {
 
     public void exitProcess(){
         try {
-            out.writeUTF("exit()");
+            out.writeUTF("exit");
             out.flush();
             success = in.readInt()==200;
             clientLogger.printLog("Closing connection to server", serverName, success, LogType.Log);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void resetBoard(){
+        try {
+            out.writeUTF("reset");
+            out.flush();
+            success = in.readInt()==200;
+            clientLogger.printLog("Resetting board", serverName, success, LogType.Log);
         } catch (IOException e) {
             e.printStackTrace();
         }

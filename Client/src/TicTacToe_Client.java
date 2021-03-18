@@ -10,6 +10,7 @@ public class TicTacToe_Client {
     private Engine renderEngine;
     private Client client;
     private boolean isSingleServer;
+    private static String clientName;
 
     public TicTacToe_Client(){
         renderEngine = Engine.waitForEngine();
@@ -17,7 +18,7 @@ public class TicTacToe_Client {
 
     private void ticTacToe_gameloop(){
         //Setup
-        client = new Client("server", 2589, "second");
+        client = new Client("server", 2589, clientName);
         client.handshake();
         isSingleServer = client.getServerType();
         if (isSingleServer){
@@ -80,8 +81,8 @@ public class TicTacToe_Client {
                    winCoordinates.add(Integer.valueOf(s) * 300);
                }
                //this.drawWinningLine(winCoordinates);
-               client.exitProcess();
-               System.exit(0);
+               //client.exitProcess();
+               client.resetBoard();
            }
        } else {
            int column = (int) renderEngine.getCoordinates().getX() / 300;
@@ -125,6 +126,11 @@ public class TicTacToe_Client {
             }
         }.start();
         TicTacToe_Client test = new TicTacToe_Client();
+        try{
+            clientName = args[0];
+        } catch (Exception e){
+            clientName = "testing";
+        }
         test.ticTacToe_gameloop();
     }
 

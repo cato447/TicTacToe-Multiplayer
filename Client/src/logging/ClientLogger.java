@@ -20,10 +20,10 @@ public class ClientLogger {
         switch (logType){
             case Log:
                 if (success){
-                    System.out.printf( ANSI_BLUE + "(%s) " + ANSI_CYAN + "[%s] " + ANSI_GREEN + "%s%n" + ANSI_RESET,
+                    System.out.printf(ANSI_BLUE + "(%s) " + ANSI_CYAN + "[%s] " + ANSI_WHITE + "[status] " + ANSI_GREEN + "%s%n" + ANSI_RESET,
                             new Timestamp(System.currentTimeMillis()), name, message);
                 } else {
-                    System.out.printf(ANSI_BLUE + "(%s) " + ANSI_CYAN + "[%s] " + ANSI_RED + "%s%n" + ANSI_RESET,
+                    System.out.printf(ANSI_BLUE + "(%s) " + ANSI_CYAN + "[%s] " + ANSI_WHITE + "[status] " + ANSI_RED + "%s%n" + ANSI_RESET,
                             new Timestamp(System.currentTimeMillis()), name, message);
                 }
                 break;
@@ -32,8 +32,17 @@ public class ClientLogger {
                 System.out.printf(ANSI_PURPLE + "(%s) [%s] %s%n"+ ANSI_RESET, new Timestamp(System.currentTimeMillis()), name, message);
                 break;
 
-            case Message:
-                System.out.printf(ANSI_WHITE + "    (%s) [%s] %s%n" +ANSI_RESET, new Timestamp(System.currentTimeMillis()), name, message);
+            case Input:
+                System.out.printf(ANSI_BLUE + "(%s) " + ANSI_CYAN + "[%s] " + ANSI_WHITE + "[input]  " + ANSI_YELLOW  +"%s%n" +ANSI_RESET, new Timestamp(System.currentTimeMillis()), name, message);
+                break;
+
+            case Output:
+                if (success){
+                    System.out.printf(ANSI_BLUE + "(%s) " + ANSI_CYAN + "[%s] " + ANSI_WHITE + "[output] " + ANSI_GREEN +"%s%n" +ANSI_RESET, new Timestamp(System.currentTimeMillis()), name, message);
+                }else {
+                    System.out.printf(ANSI_BLUE + "(%s) " + ANSI_CYAN + "[%s] " + ANSI_WHITE + "[output] " + ANSI_RED +"%s%n" +ANSI_RESET, new Timestamp(System.currentTimeMillis()), name, message);
+                }
+
                 break;
 
             default:

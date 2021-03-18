@@ -37,7 +37,6 @@ public class MultiPlayerServer {
             scanner = new Scanner(System.in);
             serverLogger = new ServerLogger();
             requiredConnections = 2;
-            serverLogger.printLog(ticTacToe_server.getGameState(), this.getClass().getName(), LogType.Log);
 
             serverLogger.printLog("Server started successfully", LogType.Log);
         } catch (IOException e) {
@@ -69,7 +68,7 @@ public class MultiPlayerServer {
                     outstreams.get(client).writeInt(200);
                     outstreams.get(client).flush();
                     clientNames.put(client, instreams.get(client).readUTF());
-                    serverLogger.printLog(String.format("%s got connected", clientNames.get(client)), LogType.Log);
+                    serverLogger.printLog(String.format("Client \"%s\" got connected", clientNames.get(client)), LogType.Log);
                 } else {
                     outstreams.get(client).writeInt(403);
                     outstreams.get(client).flush();
@@ -184,8 +183,6 @@ public class MultiPlayerServer {
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-                    } else {
-                        serverLogger.printLog("Current client not in clients!", LogType.Error);
                     }
                 }
                 break;
