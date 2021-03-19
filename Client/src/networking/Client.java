@@ -152,6 +152,10 @@ public class Client {
         }
     }
 
+    public void printLog(String message, boolean success){
+        clientLogger.printLog(message, success, LogType.Log);
+    }
+
     public String getName() {
         return name;
     }

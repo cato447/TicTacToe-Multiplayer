@@ -208,8 +208,6 @@ public class SinglePlayerServer {
 
             case "exit":
                 try {
-                    outstreams.get(client).writeInt(200);
-                    outstreams.get(client).flush();
                     outstreams.get(client).close();
                     instreams.get(client).close();
                     client.close();
@@ -220,14 +218,8 @@ public class SinglePlayerServer {
                 break;
 
             case "reset":
-                try {
-                    outstreams.get(client).writeInt(200);
-                    outstreams.get(client).flush();
-                    ticTacToe_server.resetGameState();
-                    this.gameFlow("gameState", client);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                ticTacToe_server.resetGameState();
+                this.sendGameState(client);
                 break;
         }
     }

@@ -23,7 +23,6 @@ public class Engine extends Application {
     private boolean mouseClicked = false;
     private Point coordinates = new Point();
     private Stage primaryStage;
-    private MouseEvent mouseEvent;
 
     public Engine() {
         setEngine(this);
@@ -90,6 +89,9 @@ public class Engine extends Application {
         if (gameState.length() != 9) {
             System.err.println("Wrong length of gameState string");
             return;
+        }
+        if (gameState.equals("---------")){
+            grid.getChildren().clear();
         }
         for (int i = 0; i < gameState.length(); i++) {
             int column = i / 3;
