@@ -1,0 +1,6 @@
+#!/bin/bash
+cd /home/cato447/Code/ArcadeMachine/out/production/Server/
+jar cmvf /home/cato447/Code/ArcadeMachine/Server/res/META-INF/MANIFEST.MF TicTacToe_Server.jar *
+scp TicTacToe_Server.jar root@server:/root
+ssh root@server chmod +x TicTacToe_Server.jar
+rm TicTacToe_Server.jar

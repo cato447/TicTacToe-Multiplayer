@@ -21,6 +21,7 @@ public class Engine extends Application {
     private static final CountDownLatch latch = new CountDownLatch(1);
     private static Engine engine = null;
     private boolean mouseClicked = false;
+    private boolean windowClosed = false;
     private Point coordinates = new Point();
     private Stage primaryStage;
 
@@ -62,7 +63,7 @@ public class Engine extends Application {
         latch.countDown();
     }
 
-    public void updateTitle(String title){
+    public void updateTitle(String title) {
         System.out.println("title: " + title);
         primaryStage.setTitle(title);
     }
@@ -90,7 +91,7 @@ public class Engine extends Application {
             System.err.println("Wrong length of gameState string");
             return;
         }
-        if (gameState.equals("---------")){
+        if (gameState.equals("---------")) {
             grid.getChildren().clear();
         }
         for (int i = 0; i < gameState.length(); i++) {
@@ -111,6 +112,8 @@ public class Engine extends Application {
         mouseClicked = true;
         coordinates.setLocation(event.getX(), event.getY());
     }
+
+    public boolean isWindowClosed() {return windowClosed;}
 
     public boolean isMouseClicked() {
         return mouseClicked;
@@ -134,6 +137,10 @@ public class Engine extends Application {
         primaryStage.setScene(this.setScene());
         primaryStage.sizeToScene();
         primaryStage.show();
+
+        primaryStage.setOnCloseRequest(event -> {
+            windowClosed = true;
+        });
     }
 
     public static void main(String[] args) {

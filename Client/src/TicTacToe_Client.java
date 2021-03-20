@@ -24,7 +24,7 @@ public class TicTacToe_Client {
         if (isSingleServer){
             this.setWindowTitle(client.isPlayerOne());
             client.sendToServer("ready");
-            while (client.isConnected()) {
+            while (client.isConnected() && !renderEngine.isWindowClosed()) {
                 String message = client.getResponse();
                 //Check if message is gamestate
                 if (message.charAt(0) == 'x' || message.charAt(0) == '-' || message.charAt(0) == 'o') {
@@ -35,6 +35,11 @@ public class TicTacToe_Client {
                 else {
                     this.gameFlow(message);
                 }
+            }
+            try {
+                client.exitProcess();
+            } catch (Exception e){
+                e.printStackTrace();
             }
         } else {
             this.setWindowTitle(client.isPlayerOne());

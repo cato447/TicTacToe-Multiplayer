@@ -5,13 +5,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.Random;
 
-public class TicTacToe_Server {
+public class TicTacToe_GameRules {
 
     private String gameState;
     private Integer[][] board;
     Point startWin, endWin;
 
-    public TicTacToe_Server(){
+    public TicTacToe_GameRules(){
         gameState = "---------";
     }
 
