@@ -92,6 +92,16 @@ public class Client {
         return isClientOne;
     }
 
+    public String getGameState(){
+        try {
+            out.writeUTF("gameState");
+            return this.getResponse();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return "---------";
+    }
+
     public boolean getServerType(){
         this.sendToServer("serverType");
         boolean serverType = this.getBooleanResponse("isSingleServer");

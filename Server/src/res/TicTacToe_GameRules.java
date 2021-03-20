@@ -12,7 +12,7 @@ public class TicTacToe_GameRules {
     Point startWin, endWin;
 
     public TicTacToe_GameRules(){
-        gameState = "---------";
+        gameState = "o--x-o--x";
     }
 
     public void resetGameState() {
@@ -34,13 +34,13 @@ public class TicTacToe_GameRules {
         board = this.convertToNumbers(gameState);
     }
 
-    public boolean makeClientMove(String input) {
+    public boolean makeClientMove(String input, int id) {
         int column = Double.valueOf(input.split("\\|")[0]).intValue() / 300;
         int row = Double.valueOf(input.split("\\|")[1]).intValue() / 300;
         int index = column * 3 + row;
 
         if (isLegalMove(column, row)) {
-            makeMoveOnBoard(index, 0);
+            makeMoveOnBoard(index, id);
             return true;
         } else {
             return false;
@@ -143,7 +143,6 @@ public class TicTacToe_GameRules {
     public boolean gameEnded(){
         return horizontalWin() || verticalWin() || diagonalWin();
     }
-
 
     public Point[] getWinCoordinates(){
         return new Point[]{startWin, endWin};

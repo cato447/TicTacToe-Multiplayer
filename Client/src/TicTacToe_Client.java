@@ -9,47 +9,45 @@ public class TicTacToe_Client {
 
     private Engine renderEngine;
     private Client client;
-    private boolean isSingleServer;
     private static String clientName;
+    private boolean isPlayerOne;
 
-    public TicTacToe_Client(){
+    public TicTacToe_Client() {
         renderEngine = Engine.waitForEngine();
-    }
-
-    private void ticTacToe_gameloop(){
-        //Setup
         client = new Client("server", 2589, clientName);
         client.handshake();
-        isSingleServer = client.getServerType();
-        if (isSingleServer){
-            this.setWindowTitle(client.isPlayerOne());
-            client.sendToServer("ready");
-            while (client.isConnected() && !renderEngine.isWindowClosed()) {
-                String message = client.getResponse();
-                //Check if message is gamestate
-                if (message.charAt(0) == 'x' || message.charAt(0) == '-' || message.charAt(0) == 'o') {
-                    this.drawBoard(message);
-                    this.gameFlow("userInput");
-                }
-                //Handle everything else
-                else {
-                    this.gameFlow(message);
-                }
+        isPlayerOne = client.isPlayerOne();
+        this.setWindowTitle(isPlayerOne);
+        client.sendToServer("ready");
+    }
+
+    private void ticTacToe_gameloop() {
+        this.drawBoard(client.getGameState());
+        if (isPlayerOne){
+            this.userInput();
+        }
+        while (client.isConnected() && !renderEngine.isWindowClosed()) {
+            String message = client.getResponse();
+            //Check if message is gamestate
+            if (message.charAt(0) == 'x' || message.charAt(0) == '-' || message.charAt(0) == 'o') {
+                this.drawBoard(message);
             }
-            try {
-                client.exitProcess();
-            } catch (Exception e){
-                e.printStackTrace();
+            //Handle everything else
+            else {
+                this.gameFlow(message);
             }
-        } else {
-            this.setWindowTitle(client.isPlayerOne());
+        }
+        try {
+            client.exitProcess();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
-    private void gameFlow(String input){
+    private void gameFlow(String input) {
         switch (input) {
             case "userInput":
-                while(!renderEngine.isMouseClicked()){
+                while (!renderEngine.isMouseClicked()) {
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
@@ -59,47 +57,62 @@ public class TicTacToe_Client {
                 renderEngine.setMouseClicked(false);
                 this.userInput();
                 break;
+
+            case "invalidInput":
+                this.onInvalidInput();
+                break;
+
+            case ""
         }
     }
 
+    private void requestOpponentMove(){
+        client.sendToServer("opponentMove");
+    }
 
+    private void onGameEnd(){
+        LinkedList<Integer> winCoordinates = new LinkedList<>();
+        //Get winning fields
+        String response = client.getResponse();
+        for (String s : Arrays.copyOfRange(response.split(";"), 0, 4)) {
+            winCoordinates.add(Integer.valueOf(s) * 300);
+        }
+        //this.drawWinningLine(winCoordinates);
+        //client.exitProcess();
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        client.resetBoard();
+    }
 
+    private void onInvalidInput(){
+        int column = (int) renderEngine.getCoordinates().getX() / 300;
+        int row = (int) renderEngine.getCoordinates().getY() / 300;
+        System.err.printf("You are not allowed to place at %d|%d%n", column, row);
+        this.userInput();
+    }
 
-   private void userInput(){
-       //Send command
-       client.sendToServer("clientMove");
-       //Send position
-       client.sendToServer(String.format("%f|%f", renderEngine.getCoordinates().getX(), renderEngine.getCoordinates().getY()));
-       //Get gameState
-       String gameState = client.getResponse();
-       if (gameState.length() == 9) {
-           this.drawBoard(gameState);
-           //Send command
-           if (!client.getGameEnded()) {
-               client.sendToServer("computerMove");
-               this.drawBoard(client.getResponse());
-           } else {
-               LinkedList<Integer> winCoordinates = new LinkedList<>();
-               //Get winning fields
-               String response = client.getResponse();
-               for (String s : Arrays.copyOfRange(response.split(";"), 0, 4)) {
-                   winCoordinates.add(Integer.valueOf(s) * 300);
-               }
-               //this.drawWinningLine(winCoordinates);
-               //client.exitProcess();
-               try {
-                   Thread.sleep(1000);
-               } catch (InterruptedException e) {
-                   e.printStackTrace();
-               }
-               client.resetBoard();
-           }
-       } else {
-           int column = (int) renderEngine.getCoordinates().getX() / 300;
-           int row = (int) renderEngine.getCoordinates().getY() / 300;
-           System.err.printf("You are not allowed to place at %d|%d%n", column, row);
-       }
-   }
+    private void userInput() {
+        client.sendToServer("clientMove");
+        client.sendToServer(String.format("%f|%f", renderEngine.getCoordinates().getX(), renderEngine.getCoordinates().getY()));
+        //Get gameState
+        String gameState = client.getResponse();
+        if (gameState.length() == 9) {
+            this.drawBoard(gameState);
+            //Send command
+            if (!client.getGameEnded()) {
+               this.requestOpponentMove();
+            } else {
+                this.onGameEnd();
+            }
+        } else {
+            int column = (int) renderEngine.getCoordinates().getX() / 300;
+            int row = (int) renderEngine.getCoordinates().getY() / 300;
+            System.err.printf("You are not allowed to place at %d|%d%n", column, row);
+        }
+    }
 
     private void drawBoard(String gameState) {
         Platform.runLater(new Runnable() {
@@ -110,8 +123,8 @@ public class TicTacToe_Client {
         });
     }
 
-    private void setWindowTitle(boolean isClientOne){
-        if (isClientOne){
+    private void setWindowTitle(boolean isClientOne) {
+        if (isClientOne) {
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
@@ -129,16 +142,16 @@ public class TicTacToe_Client {
     }
 
     public static void main(String[] args) {
-        new Thread(){
+        new Thread() {
             @Override
-            public void run(){
+            public void run() {
                 javafx.application.Application.launch(Engine.class);
             }
         }.start();
         TicTacToe_Client test = new TicTacToe_Client();
-        try{
+        try {
             clientName = args[0];
-        } catch (Exception e){
+        } catch (Exception e) {
             clientName = "testing";
         }
         test.ticTacToe_gameloop();

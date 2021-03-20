@@ -11,13 +11,12 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 
 public class TicTacToe_Server {
 
     private ServerSocket serverSocket;
     private HashMap<Integer, Socket> clients;
+    private HashMap<Socket, Integer> clientIds;
     private HashMap<Socket, String> clientNames;
     private HashMap<Socket, Boolean> clientMoveAuthorizations;
     private HashMap<Socket, DataOutputStream> outstreams;
@@ -25,6 +24,7 @@ public class TicTacToe_Server {
     private TicTacToe_GameRules ticTacToe_gameRules;
     private ServerLogger serverLogger;
     private int requiredConnections;
+    private boolean[] clientsReady;
 
 
     public TicTacToe_Server(int port, int requiredConnections) {
@@ -32,12 +32,14 @@ public class TicTacToe_Server {
             serverSocket = new ServerSocket(port);
             clients = new HashMap<>();
             clientNames = new HashMap<>();
+            clientIds = new HashMap<>();
             clientMoveAuthorizations = new HashMap<>();
             outstreams = new HashMap<>();
             instreams = new HashMap<>();
             ticTacToe_gameRules = new TicTacToe_GameRules();
             serverLogger = new ServerLogger();
             this.requiredConnections = requiredConnections;
+            clientsReady = new boolean[requiredConnections];
 
             serverLogger.printLog("Server started successfully", LogType.Log);
         } catch (IOException e) {
@@ -46,6 +48,7 @@ public class TicTacToe_Server {
     }
 
     private boolean isSingleServer() {
+        serverLogger.printLog(""+ requiredConnections + (requiredConnections == 1), LogType.Error);
         return requiredConnections == 1;
     }
 
@@ -56,6 +59,7 @@ public class TicTacToe_Server {
             while (clients.size() < requiredConnections) {
                 Socket momentaryClient = serverSocket.accept();
                 clients.put(id, momentaryClient);
+                clientIds.put(clients.get(id), id);
                 outstreams.put(momentaryClient, new DataOutputStream(momentaryClient.getOutputStream()));
                 instreams.put(momentaryClient, new DataInputStream(momentaryClient.getInputStream()));
                 id++;
@@ -102,7 +106,7 @@ public class TicTacToe_Server {
         }
     }
 
-    public String handleInput(Socket client){
+    public String handleInput(Socket client) {
         String message = null;
         try {
             message = instreams.get(client).readUTF();
@@ -117,31 +121,22 @@ public class TicTacToe_Server {
     }
 
     public void ticTacToe_gameloop() {
-        if (isSingleServer()) {
-            Socket client = clients.get(0);
-            //SingleServer GameLoop
-            while (!client.isClosed()) {
-                //Get instruction
-                this.gameFlow(handleInput(client), client);
+        while (clients.size() == requiredConnections) {
+            for (Socket client : clients.values()) {
+                gameFlow(handleInput(client), client);
             }
-        } else {
-            //MultiServer GameLoop
-            gameFlow("gameState");
         }
-    }
-
-    public void gameFlow(String input){
-        this.gameFlow(input, null);
     }
 
     public void gameFlow(String input, Socket client) {
         switch (input) {
             case "ready":
-                if (isSingleServer()){
+                if (isSingleServer()) {
                     sendGameState();
                 } else {
                     sendGameState(client);
                 }
+                clientsReady[clientIds.get(client)] = true;
                 break;
 
             case "gameState":
@@ -152,14 +147,12 @@ public class TicTacToe_Server {
                 try {
                     //Get position (X|Y)
                     String position = handleInput(client);
-                    boolean moveAllowed = ticTacToe_gameRules.makeClientMove(position);
+                    boolean moveAllowed = ticTacToe_gameRules.makeClientMove(position, clientIds.get(client));
                     if (moveAllowed) {
                         sendGameState();
                     } else {
-                        //send " "
-                        outstreams.get(client).writeUTF("userInput");
+                        outstreams.get(client).writeUTF("invalidInput");
                         outstreams.get(client).flush();
-                        serverLogger.printLog("Requested userInput", LogType.Log);
                         serverLogger.printLog(String.format("Move is not allowed!"), clientNames.get(client), LogType.Error);
                     }
                 } catch (IOException e) {
@@ -167,21 +160,35 @@ public class TicTacToe_Server {
                 }
                 break;
 
-            case "computerMove":
-                ticTacToe_gameRules.makeComputerMove();
+            case "opponentMove":
+                if (isSingleServer()) {
+                    ticTacToe_gameRules.makeComputerMove();
+                    serverLogger.printLog("Made computer move", LogType.Log);
+                } else {
+                    //request move from other player
+                    try {
+                        outstreams.get(1-clientIds.get(client)).writeUTF("userInput");
+                        outstreams.get(client).flush();
+                        serverLogger.printLog("Requested opponent userInput", clientNames.get(1-clientIds.get(client)), LogType.Log);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
                 sendGameState();
-                try {
-                    outstreams.get(client).writeUTF("userInput");
-                    outstreams.get(client).flush();
-                    serverLogger.printLog("Requested userInput", LogType.Log);
-                } catch (IOException e) {
-                    e.printStackTrace();
+                if (isSingleServer()) {
+                    try {
+                        outstreams.get(client).writeUTF("userInput");
+                        outstreams.get(client).flush();
+                        serverLogger.printLog("Requested userInput", LogType.Log);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
                 break;
 
             case "serverType":
                 try {
-                    outstreams.get(client).writeBoolean(true);
+                    outstreams.get(client).writeBoolean(isSingleServer());
                     outstreams.get(client).flush();
                     serverLogger.printLog("Sent serverType", Boolean.toString(true), clientNames.get(client), LogType.Log);
                 } catch (IOException e) {
@@ -190,19 +197,11 @@ public class TicTacToe_Server {
                 break;
 
             case "isClientOne":
-                for (Map.Entry<Integer, Socket> entry : clients.entrySet()) {
-                    if (Objects.equals(client, entry.getValue())) {
-                        try {
-                            boolean isClientOne = entry.getKey() == 0;
-                            outstreams.get(client).writeBoolean(isClientOne);
-                            outstreams.get(client).flush();
-                            serverLogger.printLog("Sent isPlayerOne", Boolean.toString(isClientOne), clientNames.get(client), LogType.Log);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-                        serverLogger.printLog("Current client not in clients!", LogType.Error);
-                    }
+                boolean isClientOne = clientIds.get(client) == 0;
+                try {
+                    outstreams.get(client).writeBoolean(isClientOne);
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
                 break;
 
