@@ -1,6 +1,7 @@
 package logging;
 
-import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class ServerLogger {
 
@@ -15,21 +16,29 @@ public class ServerLogger {
     private static final String ANSI_WHITE = "\u001B[37m";
 
     public void printLog(String message, String value, String name, LogType logType){
+        //generate timestamp with fixed length
+        String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS").format(new Date());
+
         switch (logType){
+            case Input:
+                System.out.printf(ANSI_WHITE + "(%s) [%s] [input ] %s: %s%n",timestamp, name, message, value);
+                break;
+
+            case Output:
+                System.out.printf(ANSI_CYAN + "(%s) [%s] [output] %s: %s%n",timestamp, name, message, value);
+                break;
+
             case Log:
-                System.out.printf(ANSI_CYAN + "%s %s: %s%n"+ANSI_RESET, new Timestamp(System.currentTimeMillis()), message, value);
+                System.out.printf(ANSI_PURPLE + "(%s)           [status] %s: %s%n"+ANSI_RESET, timestamp, message, value);
                 break;
 
             case Error:
-                System.out.printf(ANSI_RED + "%s %s: %s%n"+ ANSI_RESET, new Timestamp(System.currentTimeMillis()), message, value);
-                break;
-
-            case Message:
-                System.out.printf(ANSI_WHITE + "    %s %s %s%n" +ANSI_RESET, new Timestamp(System.currentTimeMillis()), name, message);
+                System.out.printf(ANSI_RED + "(%s) [error]          %s: %s%n"+ ANSI_RESET, timestamp, message, value);
                 break;
 
             default:
                 System.err.println("NO VALID LOGTYPE GIVEN");;
+                break;
         }
     }
 

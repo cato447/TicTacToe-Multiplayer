@@ -2,6 +2,7 @@ package logging;
 
 public enum LogType {
     Log,
-    Message,
+    Input,
+    Output,
     Error
 }
