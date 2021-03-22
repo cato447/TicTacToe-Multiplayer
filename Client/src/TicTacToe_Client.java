@@ -1,4 +1,5 @@
 import javafx.application.Platform;
+import logging.LogType;
 import networking.Client;
 import render.Engine;
 
@@ -11,26 +12,29 @@ public class TicTacToe_Client {
     private Client client;
     private static String clientName;
     private boolean isPlayerOne;
+    private boolean isAllowedToMove;
 
     public TicTacToe_Client() {
         renderEngine = Engine.waitForEngine();
         client = new Client("server", 2589, clientName);
         client.handshake();
         isPlayerOne = client.isPlayerOne();
+        isAllowedToMove = isPlayerOne;
         this.setWindowTitle(isPlayerOne);
         client.sendToServer("ready");
     }
 
     private void ticTacToe_gameloop() {
-        this.drawBoard(client.getGameState());
-        if (isPlayerOne){
-            this.userInput();
-        }
         while (client.isConnected() && !renderEngine.isWindowClosed()) {
+            client.printLog("Waiting for data", true, LogType.Log);
             String message = client.getResponse();
             //Check if message is gamestate
-            if (message.charAt(0) == 'x' || message.charAt(0) == '-' || message.charAt(0) == 'o') {
+            if (message.matches("([xo-]){9}")) {
+                client.printLog("Board updated", true, LogType.Log);
                 this.drawBoard(message);
+                if (isAllowedToMove){
+                    this.gameFlow("userInput");
+                }
             }
             //Handle everything else
             else {
@@ -46,6 +50,11 @@ public class TicTacToe_Client {
 
     private void gameFlow(String input) {
         switch (input) {
+            case "opponentMove":
+                //if opponent makes move allow a move
+                isAllowedToMove = true;
+                break;
+
             case "userInput":
                 while (!renderEngine.isMouseClicked()) {
                     try {
@@ -55,19 +64,19 @@ public class TicTacToe_Client {
                     }
                 }
                 renderEngine.setMouseClicked(false);
+                isAllowedToMove = false;
                 this.userInput();
                 break;
 
             case "invalidInput":
+                isAllowedToMove = true;
                 this.onInvalidInput();
                 break;
 
-            case ""
+            case "gameEnded":
+                this.onGameEnd();
+                break;
         }
-    }
-
-    private void requestOpponentMove(){
-        client.sendToServer("opponentMove");
     }
 
     private void onGameEnd(){
@@ -91,27 +100,12 @@ public class TicTacToe_Client {
         int column = (int) renderEngine.getCoordinates().getX() / 300;
         int row = (int) renderEngine.getCoordinates().getY() / 300;
         System.err.printf("You are not allowed to place at %d|%d%n", column, row);
-        this.userInput();
+        this.gameFlow("userInput");
     }
 
     private void userInput() {
         client.sendToServer("clientMove");
         client.sendToServer(String.format("%f|%f", renderEngine.getCoordinates().getX(), renderEngine.getCoordinates().getY()));
-        //Get gameState
-        String gameState = client.getResponse();
-        if (gameState.length() == 9) {
-            this.drawBoard(gameState);
-            //Send command
-            if (!client.getGameEnded()) {
-               this.requestOpponentMove();
-            } else {
-                this.onGameEnd();
-            }
-        } else {
-            int column = (int) renderEngine.getCoordinates().getX() / 300;
-            int row = (int) renderEngine.getCoordinates().getY() / 300;
-            System.err.printf("You are not allowed to place at %d|%d%n", column, row);
-        }
     }
 
     private void drawBoard(String gameState) {
@@ -148,12 +142,12 @@ public class TicTacToe_Client {
                 javafx.application.Application.launch(Engine.class);
             }
         }.start();
-        TicTacToe_Client test = new TicTacToe_Client();
         try {
             clientName = args[0];
         } catch (Exception e) {
             clientName = "testing";
         }
+        TicTacToe_Client test = new TicTacToe_Client();
         test.ticTacToe_gameloop();
     }
 

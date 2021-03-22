@@ -7,7 +7,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.Scanner;
+import java.util.Arrays;
 
 public class Client {
     private Socket serverSocket;
@@ -39,7 +39,7 @@ public class Client {
         try {
             out.writeInt(165313125);
             out.flush();
-            success = in.readInt() == 200;
+            success = in.readBoolean();
             if (success) {
                 out.writeUTF(name);
                 out.flush();
@@ -54,11 +54,37 @@ public class Client {
     }
 
     public void sendToServer(String message) {
+        int availableBits = 0;
         try {
             out.writeUTF(message);
             out.flush();
-            success = in.readInt() == 200;
+            boolean success = in.readBoolean();
             clientLogger.printLog(String.format("Sent the message: %s", message), serverName, success, LogType.Output);
+            if(in.available() > 0){
+                availableBits = in.available();
+                throw new Exception("More than just a boolean sent");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            this.exitProcess();
+            this.printInputStream();
+            e.printStackTrace();
+            System.exit(0);
+        }
+    }
+
+    private void printInputStream(){
+        try {
+            byte[] inputBytes = in.readAllBytes();
+            for (byte b: inputBytes) {
+                if (b == 1 || b == 0){
+                    System.out.println(b == 1);
+                }
+                System.out.print(Character.toString(b));
+            }
+            System.out.println(Arrays.toString(inputBytes));
+            System.out.print("\n");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -124,7 +150,7 @@ public class Client {
         try {
             out.writeUTF("exit");
             out.flush();
-            success = in.readInt()==200;
+            success = in.readBoolean();
             clientLogger.printLog("Closing connection to server", serverName, success, LogType.Log);
         } catch (IOException e) {
             e.printStackTrace();
@@ -135,7 +161,7 @@ public class Client {
         try {
             out.writeUTF("reset");
             out.flush();
-            success = in.readInt()==200;
+            success = in.readBoolean();
             clientLogger.printLog("Resetting board", serverName, success, LogType.Log);
         } catch (IOException e) {
             e.printStackTrace();
@@ -150,8 +176,8 @@ public class Client {
         authorizedToMove = isAuthorizedToMove;
     }
 
-    public void printLog(String message, boolean success){
-        clientLogger.printLog(message, success, LogType.Log);
+    public void printLog(String message, boolean success, LogType logType){
+        clientLogger.printLog(message, success, logType);
     }
 
     public boolean isConnected(){

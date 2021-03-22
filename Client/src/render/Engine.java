@@ -64,7 +64,6 @@ public class Engine extends Application {
     }
 
     public void updateTitle(String title) {
-        System.out.println("title: " + title);
         primaryStage.setTitle(title);
     }
 
@@ -87,10 +86,6 @@ public class Engine extends Application {
     }
 
     public void drawBoard(String gameState) {
-        if (gameState.length() != 9) {
-            System.err.println("Wrong length of gameState string");
-            return;
-        }
         if (gameState.equals("---------")) {
             grid.getChildren().clear();
         }
