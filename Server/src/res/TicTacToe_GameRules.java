@@ -35,8 +35,15 @@ public class TicTacToe_GameRules {
     }
 
     public boolean makeClientMove(String input, int id) {
-        int column = Double.valueOf(input.split("\\|")[0]).intValue() / 300;
-        int row = Double.valueOf(input.split("\\|")[1]).intValue() / 300;
+        int column = 0;
+        int row = 0;
+        if (input.contains(",")){
+            column = Integer.valueOf(input.split("\\|")[0].split(",")[0]) / 300;
+            row = Integer.valueOf(input.split("\\|")[1].split(",")[0]) / 300;
+        } else {
+            column = (int) Double.valueOf(input.split("\\|")[0]).doubleValue() / 300;
+            row = (int) Double.valueOf(input.split("\\|")[1]).doubleValue() / 300;
+        }
         int index = column * 3 + row;
 
         if (isLegalMove(column, row)) {

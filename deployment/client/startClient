@@ -1,0 +1,3 @@
+#!/bin/sh
+cd ~/Code/ArcadeMachine/deployment/client
+java -jar package/TicTacToe_Client.jar linux

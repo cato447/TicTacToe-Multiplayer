@@ -55,14 +55,12 @@ public class Client {
     }
 
     public void sendToServer(String message) {
-        int availableBits = 0;
         try {
             out.writeUTF(message);
             out.flush();
             boolean success = in.readBoolean();
             clientLogger.printLog(String.format("Sent the message: %s", message), serverName, success, LogType.Output);
             if(in.available() > 0){
-                availableBits = in.available();
                 throw new Exception("More than just a boolean sent");
             }
         } catch (IOException e) {
