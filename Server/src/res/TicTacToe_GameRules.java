@@ -12,7 +12,7 @@ public class TicTacToe_GameRules {
     Point startWin, endWin;
 
     public TicTacToe_GameRules(){
-        gameState = "o--x-o--x";
+        gameState = "---------";
     }
 
     public void resetGameState() {
@@ -141,7 +141,7 @@ public class TicTacToe_GameRules {
     }
 
     public boolean gameEnded(){
-        return horizontalWin() || verticalWin() || diagonalWin();
+        return horizontalWin() || verticalWin() || diagonalWin() || this.gameState.matches("([xo]){9}");
     }
 
     public Point[] getWinCoordinates(){

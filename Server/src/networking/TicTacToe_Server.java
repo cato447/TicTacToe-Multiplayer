@@ -62,8 +62,9 @@ public class TicTacToe_Server {
         for (Socket client: clients.values()) {
             try {
                 boolean gameEnded = ticTacToe_gameRules.gameEnded();
-                outstreams.get(client).writeBoolean(gameEnded);
                 if (gameEnded) {
+                    outstreams.get(client).writeUTF("gameEnded");
+                    outstreams.get(client).flush();
                     //send coordinates
                     String coordinates = "";
                     for (Point point : ticTacToe_gameRules.getWinCoordinates()) {
@@ -185,6 +186,7 @@ public class TicTacToe_Server {
                         if (ticTacToe_gameRules.gameEnded()){
                             sendGameState();
                             this.onGameEnd();
+                            break;
                         }
                         if (!isSingleServer()) {
                             outstreams.get(clients.get(1 - clientIds.get(client))).writeUTF("opponentMove");
@@ -192,11 +194,15 @@ public class TicTacToe_Server {
                             sendGameState();
                         } else {
                             sendGameState();
-                            ticTacToe_gameRules.makeComputerMove();
                             serverLogger.printLog("Trigger computer move", LogType.Log);
+                            ticTacToe_gameRules.makeComputerMove();
                             outstreams.get(client).writeUTF("opponentMove");
                             outstreams.get(client).flush();
                             sendGameState();
+                            if (ticTacToe_gameRules.gameEnded()){
+                                this.onGameEnd();
+                                break;
+                            }
                         }
 
                     } else {
@@ -228,25 +234,6 @@ public class TicTacToe_Server {
                 }
                 break;
 
-            case "gameEnded":
-                try {
-                    boolean gameEnded = ticTacToe_gameRules.gameEnded();
-                    outstreams.get(client).writeBoolean(gameEnded);
-                    if (gameEnded) {
-                        //send coordinates
-                        String coordinates = "";
-                        for (Point point : ticTacToe_gameRules.getWinCoordinates()) {
-                            coordinates += point.x + ";" + point.y + ";";
-                        }
-                        //send winning fields
-                        outstreams.get(client).writeUTF(coordinates);
-                        serverLogger.printLog("Winning coordinates got sent", clientNames.get(client), LogType.Log);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                break;
-
             case "exit":
                 try {
                     outstreams.get(client).close();
@@ -260,7 +247,7 @@ public class TicTacToe_Server {
 
             case "reset":
                 ticTacToe_gameRules.resetGameState();
-                this.sendGameState();
+                sendGameState(client);
                 break;
         }
     }

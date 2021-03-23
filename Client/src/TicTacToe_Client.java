@@ -16,11 +16,18 @@ public class TicTacToe_Client {
 
     public TicTacToe_Client() {
         renderEngine = Engine.waitForEngine();
-        client = new Client("server", 2589, clientName);
+        client = new Client("81.169.149.143", 2589, clientName);
         client.handshake();
         isPlayerOne = client.isPlayerOne();
         isAllowedToMove = isPlayerOne;
-        this.setWindowTitle(isPlayerOne);
+        //this.setWindowTitle(isPlayerOne);
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                renderEngine.updateTitle(clientName);
+            }
+        });
+
         client.sendToServer("ready");
     }
 
@@ -56,6 +63,7 @@ public class TicTacToe_Client {
                 break;
 
             case "userInput":
+                client.printLog("Waiting for userInput", true, LogType.Log);
                 while (!renderEngine.isMouseClicked()) {
                     try {
                         Thread.sleep(100);
@@ -94,6 +102,7 @@ public class TicTacToe_Client {
             e.printStackTrace();
         }
         client.resetBoard();
+        isAllowedToMove = isPlayerOne;
     }
 
     private void onInvalidInput(){
