@@ -1,6 +1,6 @@
 #!/bin/sh
 cp ~/Code/ArcadeMachine/out/artifacts/Client_jar/Client.jar ~/Code/ArcadeMachine/deployment/client/package
 cd /var/www/html
-scp * root@server:/var/www/html/
-scp files/* root@server:/var/www/html/files
+scp index.css index.html root@server:/var/www/html/
+scp files/Client.jar files/startClient.bat root@server:/var/www/html/files
 ssh root@server systemctl restart apache2

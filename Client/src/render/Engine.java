@@ -11,6 +11,7 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
+
 import java.awt.*;
 import java.util.concurrent.CountDownLatch;
 
@@ -38,22 +39,9 @@ public class Engine extends Application {
         grid.setVgap(75);
     }
 
-    private Scene setStartingScene(){
-        scene = new Scene(grid, 900, 900);
-        grid.add(new javafx.scene.control.Label("Your Username"), 0, 0);
-        grid.add(new javafx.scene.control.TextField(), 1,0);
-        scene.setOnMousePressed(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent mouseEvent) {
-
-            }
-        });
-        return scene;
-    }
-
     private Scene setPlayingScene() {
         scene = new Scene(grid, 900, 900);
-        scene.getStylesheets().add("res/TicTacToe_Client.css");
+        scene.getStylesheets().add("game/TicTacToe_Client.css");
         scene.setOnMousePressed(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
@@ -149,7 +137,8 @@ public class Engine extends Application {
         primaryStage.setTitle("Test");
         primaryStage.setResizable(true);
         this.initializeGrid();
-        primaryStage.setScene(this.setPlayingScene());
+        this.scene = this.setPlayingScene();
+        primaryStage.setScene(scene);
         primaryStage.sizeToScene();
         primaryStage.show();
 

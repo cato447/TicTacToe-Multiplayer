@@ -1,6 +1,6 @@
 import logging.LogType;
 import logging.ServerLogger;
-import res.TicTacToe_GameRules;
+import game.TicTacToe_GameRules;
 
 import java.awt.*;
 import java.io.DataInputStream;
@@ -201,12 +201,16 @@ public class TicTacToe_Server {
                             sendGameState();
                             serverLogger.printLog("Trigger computer move", LogType.Log);
                             ticTacToe_gameRules.makeComputerMove();
-                            outstreams.get(client).writeUTF("opponentMove");
-                            outstreams.get(client).flush();
-                            sendGameState();
+                            Thread.sleep(500);
                             if (ticTacToe_gameRules.gameEnded()){
+                                sendGameState();
+                                Thread.sleep(1000);
                                 this.onGameEnd();
                                 break;
+                            } else {
+                                outstreams.get(client).writeUTF("opponentMove");
+                                outstreams.get(client).flush();
+                                sendGameState();
                             }
                         }
 
@@ -216,6 +220,8 @@ public class TicTacToe_Server {
                         serverLogger.printLog("Move is not allowed", clientNames.get(client), position,LogType.Error);
                     }
                 } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
                 break;

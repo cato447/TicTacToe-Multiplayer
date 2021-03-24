@@ -1,18 +1,21 @@
-package res;
+package game;
+
+import ai.MinMax;
 
 import java.awt.*;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
-import java.util.Random;
 
 public class TicTacToe_GameRules {
 
     private String gameState;
     private Integer[][] board;
+    private MinMax ai;
     Point startWin, endWin;
 
     public TicTacToe_GameRules(){
         gameState = "---------";
+        ai = new MinMax();
     }
 
     public void resetGameState() {
@@ -55,12 +58,8 @@ public class TicTacToe_GameRules {
     }
 
     public void makeComputerMove(){
-        LinkedList<Integer> emptySpaces = getEmptySpaces();
-        if (emptySpaces.size() > 0) {
-            Random random = new Random();
-            int index = emptySpaces.get(random.nextInt(emptySpaces.size()));
-            makeMoveOnBoard(index, 1);
-        }
+        int index = ai.findBestMove(ai.convertBoard(this.getGameState()));
+        makeMoveOnBoard(index, 1);
     }
 
     private LinkedList<Integer> getEmptySpaces(){
