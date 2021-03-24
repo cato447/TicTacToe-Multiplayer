@@ -89,6 +89,15 @@ public class Client {
         }
     }
 
+    public boolean hasMessage(){
+        try {
+            return in.available() < 0;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public String getResponse() {
         try {
             String message = in.readUTF();

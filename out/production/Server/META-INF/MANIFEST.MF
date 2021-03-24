@@ -1,3 +1,3 @@
 Manifest-Version: 1.0
-Main-Class: networking.TicTacToe_Server
+Main-Class: TicTacToe_Server
 

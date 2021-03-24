@@ -63,8 +63,8 @@ public class TicTacToe_Client {
                 break;
 
             case "userInput":
-                client.sendToServer("test");
                 client.printLog("Waiting for userInput", true, LogType.Log);
+                renderEngine.setMoveAllowed(true);
                 while (!renderEngine.isMouseClicked()) {
                     try {
                         Thread.sleep(100);
@@ -73,6 +73,7 @@ public class TicTacToe_Client {
                     }
                 }
                 renderEngine.setMouseClicked(false);
+                renderEngine.setMoveAllowed(false);
                 isAllowedToMove = false;
                 this.userInput();
                 break;

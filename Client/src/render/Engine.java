@@ -22,6 +22,7 @@ public class Engine extends Application {
     private static Engine engine = null;
     private boolean mouseClicked = false;
     private boolean windowClosed = false;
+    private boolean moveAllowed = false;
     private Point coordinates = new Point();
     private Stage primaryStage;
 
@@ -37,7 +38,20 @@ public class Engine extends Application {
         grid.setVgap(75);
     }
 
-    private Scene setScene() {
+    private Scene setStartingScene(){
+        scene = new Scene(grid, 900, 900);
+        grid.add(new javafx.scene.control.Label("Your Username"), 0, 0);
+        grid.add(new javafx.scene.control.TextField(), 1,0);
+        scene.setOnMousePressed(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+
+            }
+        });
+        return scene;
+    }
+
+    private Scene setPlayingScene() {
         scene = new Scene(grid, 900, 900);
         scene.getStylesheets().add("res/TicTacToe_Client.css");
         scene.setOnMousePressed(new EventHandler<MouseEvent>() {
@@ -104,8 +118,10 @@ public class Engine extends Application {
     }
 
     private void onMouseClick(MouseEvent event) {
-        mouseClicked = true;
-        coordinates.setLocation(event.getX(), event.getY());
+        if (moveAllowed) {
+            mouseClicked = true;
+            coordinates.setLocation(event.getX(), event.getY());
+        }
     }
 
     public boolean isWindowClosed() {return windowClosed;}
@@ -122,6 +138,10 @@ public class Engine extends Application {
         return coordinates;
     }
 
+    public void setMoveAllowed(boolean isMoveAllowed){
+        moveAllowed = isMoveAllowed;
+    }
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         //initialize window
@@ -129,7 +149,7 @@ public class Engine extends Application {
         primaryStage.setTitle("Test");
         primaryStage.setResizable(true);
         this.initializeGrid();
-        primaryStage.setScene(this.setScene());
+        primaryStage.setScene(this.setPlayingScene());
         primaryStage.sizeToScene();
         primaryStage.show();
 

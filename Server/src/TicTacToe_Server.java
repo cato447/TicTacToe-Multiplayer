@@ -1,5 +1,3 @@
-package networking;
-
 import logging.LogType;
 import logging.ServerLogger;
 import res.TicTacToe_GameRules;
@@ -157,9 +155,16 @@ public class TicTacToe_Server {
         }
         while (clients.size() == requiredConnections) {
             for (Socket client : clients.values()) {
-                gameFlow(handleInput(client), client);
+                try {
+                    if (instreams.get(client).available() > 0){
+                        gameFlow(handleInput(client), client);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
+        System.out.println("Ended");
     }
 
     public void gameFlow(String input, Socket client) {
