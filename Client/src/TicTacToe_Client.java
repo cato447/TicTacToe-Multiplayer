@@ -63,6 +63,7 @@ public class TicTacToe_Client {
                 break;
 
             case "userInput":
+                client.sendToServer("test");
                 client.printLog("Waiting for userInput", true, LogType.Log);
                 while (!renderEngine.isMouseClicked()) {
                     try {

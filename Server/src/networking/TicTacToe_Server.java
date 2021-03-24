@@ -249,6 +249,10 @@ public class TicTacToe_Server {
                 ticTacToe_gameRules.resetGameState();
                 sendGameState(client);
                 break;
+
+            default:
+                serverLogger.printLog("Unrecognized input", LogType.Log);
+                break;
         }
     }
 
