@@ -1,3 +1,3 @@
 #!/bin/sh
-cd /var/www/html/files
+cd ~/Code/ArcadeMachine/out/artifacts/Client_jar/
 java -jar Client.jar linux

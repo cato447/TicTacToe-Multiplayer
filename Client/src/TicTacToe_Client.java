@@ -90,14 +90,6 @@ public class TicTacToe_Client {
     }
 
     private void onGameEnd(){
-        LinkedList<Integer> winCoordinates = new LinkedList<>();
-        //Get winning fields
-        String response = client.getResponse();
-        for (String s : Arrays.copyOfRange(response.split(";"), 0, 4)) {
-            winCoordinates.add(Integer.valueOf(s) * 300);
-        }
-        //this.drawWinningLine(winCoordinates);
-        //client.exitProcess();
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {

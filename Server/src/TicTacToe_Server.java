@@ -63,14 +63,6 @@ public class TicTacToe_Server {
                 if (gameEnded) {
                     outstreams.get(client).writeUTF("gameEnded");
                     outstreams.get(client).flush();
-                    //send coordinates
-                    String coordinates = "";
-                    for (Point point : ticTacToe_gameRules.getWinCoordinates()) {
-                        coordinates += point.x + ";" + point.y + ";";
-                    }
-                    //send winning fields
-                    outstreams.get(client).writeUTF(coordinates);
-                    serverLogger.printLog("Winning coordinates got sent", coordinates, clientNames.get(client), LogType.Output);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
