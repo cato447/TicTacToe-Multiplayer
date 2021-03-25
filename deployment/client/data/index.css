@@ -1,0 +1,35 @@
+/* Style buttons */
+.btn {
+    background-color: DodgerBlue;
+    border: none;
+    color: white;
+    padding: 12px 30px;
+    margin: 10px 5px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 20px;
+  }
+  
+  /* Darker background on mouse-over */
+  .btn:hover {
+    background-color: RoyalBlue;
+  }
+
+  .object-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+  
+  .object-div {
+    max-width: 420px;
+    width: 100%;
+  }
+  
+  .object {
+    padding: 20px;
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+  }
