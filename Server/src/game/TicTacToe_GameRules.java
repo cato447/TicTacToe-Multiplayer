@@ -140,8 +140,8 @@ public class TicTacToe_GameRules {
             if (sum == 3 || sum == -3){
                 startWin = new Point(0, column);
                 endWin = new Point(2, column);
-                return true;
-            }
+                return true;                        //187
+            } 
         }
         return false;
     }
